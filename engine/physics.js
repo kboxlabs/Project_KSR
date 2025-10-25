@@ -1,17 +1,12 @@
-import { getScene, getPlayer, getWalls, getTorch } from './renderer.js';
+import { getPlayer, getWalls, getTorch } from './renderer.js';
 
 let canMove = true;
 const stepSize = 1;
 const moveDelay = 200;
 let activeHop = null;
 
-export function initPhysics() {
-  // nothing yet
-}
-
-export function updatePhysics(dt) {
-  // placeholder if needed
-}
+export function initPhysics() {}
+export function updatePhysics(dt) {}
 
 export function tryGridMove(dx, dz) {
   if (!canMove || activeHop) return;

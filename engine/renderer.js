@@ -1,4 +1,4 @@
-import { clamp, lerp } from './utils.js';
+import { clamp } from './utils.js';
 
 let scene, camera, renderer;
 let floor, walls = [];
@@ -7,14 +7,13 @@ let fixedRotation;
 let cameraOffset = new THREE.Vector3(0, 5, 7);
 
 let targetCameraPos = new THREE.Vector3();
-let zoomLevel = 7;      // current smoothed zoom
-let targetZoom = 7;     // scroll target
+let zoomLevel = 7;
+let targetZoom = 7;
 const zoomMin = 3;
 const zoomMax = 13;
 const zoomLerpSpeed = 0.08;
-const cameraAngle = THREE.MathUtils.degToRad(45); // steeper per user
+const cameraAngle = THREE.MathUtils.degToRad(45);
 
-// breathing sway
 const swayAmount = 0.05;
 const swaySpeed = 0.6;
 
@@ -28,7 +27,6 @@ export async function initRenderer() {
   renderer.toneMappingExposure = 1.6;
   document.body.appendChild(renderer.domElement);
 
-  // ENV
   floor = new THREE.Mesh(
     new THREE.PlaneGeometry(30, 30, 10, 10),
     new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 })
@@ -48,7 +46,6 @@ export async function initRenderer() {
     }
   }
 
-  // PLAYER
   player = new THREE.Mesh(
     new THREE.BoxGeometry(0.8, 0.8, 0.8),
     new THREE.MeshStandardMaterial({ color: 0x99aaff })
@@ -56,13 +53,11 @@ export async function initRenderer() {
   player.position.set(0, 0.5, 0);
   scene.add(player);
 
-  // LIGHTS
   torch = new THREE.PointLight(0xffbb55, 3.2, 14, 2);
   torch.position.set(0, 2.5, 0);
   scene.add(torch);
   scene.add(new THREE.AmbientLight(0x505050));
 
-  // CAMERA
   camera.position.copy(player.position).add(cameraOffset);
   camera.lookAt(player.position);
   fixedRotation = camera.quaternion.clone();
@@ -80,17 +75,13 @@ function onResize() {
 export function renderFrame(dt) {
   const now = performance.now() * 0.001;
 
-  // torch flicker
   torch.intensity = 2.8 + Math.sin(now * 7.0) * 0.3 + Math.sin(now * 13.0) * 0.15;
   torch.color.setHSL(0.08 + Math.sin(now * 0.3) * 0.02, 1, 0.55);
 
-  // smooth zoom
-  zoomLevel += (targetZoom - zoomLevel) * zoomLerpSpeed;
+  zoomLevel += (targetZoom - zoomLevel) * 0.08;
 
-  // fixed rotation (no pitch/yaw/roll changes)
   camera.quaternion.copy(fixedRotation);
 
-  // diagonal zoom offsets from angle
   const offsetY = Math.sin(cameraAngle) * zoomLevel;
   const offsetZ = Math.cos(cameraAngle) * zoomLevel;
 
@@ -98,25 +89,19 @@ export function renderFrame(dt) {
   targetCameraPos.y = player.position.y + offsetY;
   targetCameraPos.z = player.position.z + offsetZ;
 
-  // inertia to target
-  const lerpSpeed = 0.08;
-  camera.position.lerp(targetCameraPos, lerpSpeed);
+  camera.position.lerp(targetCameraPos, 0.08);
 
-  // breathing sway
-  camera.position.x += Math.sin(now * swaySpeed) * swayAmount;
-  camera.position.y += Math.sin(now * swaySpeed * 0.7) * swayAmount * 0.4;
+  camera.position.x += Math.sin(now * 0.6) * 0.05;
+  camera.position.y += Math.sin(now * 0.42) * 0.05 * 0.4;
 
   renderer.render(scene, camera);
 }
 
-// Called by main when mouse wheel scrolls
 export function setZoomComputed(scrollSteps) {
   targetZoom = clamp(targetZoom + scrollSteps * 0.5, zoomMin, zoomMax);
 }
 
 export function getZoomState() { return { zoomLevel, targetZoom }; }
-
-// Accessors for other modules
 export function getScene() { return scene; }
 export function getCamera() { return camera; }
 export function getPlayer() { return player; }
