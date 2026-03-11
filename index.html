@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Kalendale Roguelike – Beef Skellington v3</title>
+  <title>Kalendale Roguelike – Beef Skellington v5</title>
   <style>
     html, body { margin:0; padding:0; background:#000; color:#ffd; height:100%; overflow:hidden; }
     #hud {
@@ -17,24 +17,29 @@
     }
     #hud .title { font-weight: 700; color:#fff2c7; }
     #hud .muted { opacity: .85; }
-    #hud-touch {
-      margin-top: 6px;
-      opacity: 0; transition: opacity .25s ease;
-      font-size: 12px; color:#cfeaff;
-    }
+    #hud-touch { margin-top: 6px; opacity: 0; transition: opacity .25s ease; font-size: 12px; color:#cfeaff; }
     #hud-touch.show { opacity: 1; }
+    #btns { position: fixed; right: 12px; bottom: 12px; z-index: 11; display: flex; gap: 8px; }
+    .btn { font-family: inherit; font-size: 14px; color:#111; background:#ffe6a3; border:0; border-radius:10px; padding:8px 10px; cursor:pointer; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+    .btn:active { transform: translateY(1px); }
     canvas { display:block; touch-action: none; }
   </style>
 </head>
 <body>
   <div id="hud">
-    <div class="title">Kalendale • Roguelike (v3)</div>
+    <div class="title">Kalendale • Roguelike (v5)</div>
     <div id="hud-hp">HP: 20 / 20</div>
     <div id="hud-zoom">Zoom: 7.0×</div>
     <div id="hud-fps">FPS: --</div>
-    <div id="hud-touch" class="muted">Touch controls active: swipe to move, pinch to zoom</div>
+    <div id="hud-touch" class="muted">Touch: swipe to move, pinch to zoom</div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js"></script>
-  <script type="module" src="./main.js"></script>
+  <div id="btns">
+    <button id="btn-gen" class="btn">Generate (G)</button>
+  </div>
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+    window.THREE = THREE; // expose for our modules
+    import './main.js';
+  </script>
 </body>
 </html>

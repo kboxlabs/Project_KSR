@@ -1,4 +1,4 @@
-// Input: keyboard + mouse wheel + mobile swipes + pinch zoom
+// Input: keyboard + wheel + mobile swipes + pinch + regenerate key
 let keys = Object.create(null);
 let moveIntent = null;
 let scrollDelta = 0;
@@ -7,15 +7,19 @@ let touchStartX = 0, touchStartY = 0;
 let touchEndX = 0, touchEndY = 0;
 const SWIPE_THRESHOLD = 30;
 
-// Pinch
 let pinchStartDist = 0;
 let pinchAccumulator = 0;
 const PINCH_STEP_PX = 40;
 
 let touchHintCb = null;
+let regenCb = null;
 
 export function initInput() {
-  window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
+  window.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    keys[k] = true;
+    if (k === 'g' && regenCb) regenCb();
+  });
   window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
   window.addEventListener('wheel', e => {
@@ -93,3 +97,4 @@ export function consumeMoveIntent() { const i = moveIntent; moveIntent = null; r
 export function getScrollDelta() { return scrollDelta; }
 export function clearScrollDelta() { scrollDelta = 0; }
 export function onTouchHint(cb) { touchHintCb = cb; }
+export function onRegenerate(cb) { regenCb = cb; }

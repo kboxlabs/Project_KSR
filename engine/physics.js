@@ -1,27 +1,32 @@
-import { getPlayer, getWalls, getTorch } from './renderer.js';
+import { getPlayer, getTorch, isBlockedTile } from './renderer.js';
+import { playHopSound } from './sound.js';
 
 let canMove = true;
 const stepSize = 1;
-const moveDelay = 200;
+const hopDuration = 200;
+const moveCooldown = 1000;
 let activeHop = null;
+let nextMoveAt = 0;
 
 export function initPhysics() {}
 export function updatePhysics(dt) {}
 
 export function tryGridMove(dx, dz) {
   if (!canMove || activeHop) return;
+  if (performance.now() < nextMoveAt) return;
   const player = getPlayer();
-  const walls = getWalls();
-  const newX = player.position.x + dx * stepSize;
-  const newZ = player.position.z + dz * stepSize;
-  const blocked = walls.some(w => Math.abs(w.position.x - newX) < 0.9 && Math.abs(w.position.z - newZ) < 0.9);
+  const newX = Math.round(player.position.x + dx * stepSize);
+  const newZ = Math.round(player.position.z + dz * stepSize);
+  const blocked = isBlockedTile(newX, newZ);
   if (blocked) return;
 
   canMove = false;
+  playHopSound();
   const startY = player.position.y;
   const jumpPeak = 0.4;
   const startTime = performance.now();
-  const duration = moveDelay;
+  const duration = hopDuration;
+  nextMoveAt = startTime + moveCooldown;
   const startPos = player.position.clone();
   const endPos = startPos.clone(); endPos.x = newX; endPos.z = newZ;
   const torch = getTorch();
@@ -37,8 +42,12 @@ export function tryGridMove(dx, dz) {
       activeHop = requestAnimationFrame(hop);
     } else {
       player.position.y = startY;
-      canMove = true;
+      canMove = performance.now() >= nextMoveAt;
       activeHop = null;
+      if (!canMove) {
+        const wait = Math.max(0, nextMoveAt - performance.now());
+        setTimeout(() => { canMove = true; }, wait);
+      }
     }
   }
   hop();
